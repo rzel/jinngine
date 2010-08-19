@@ -25,7 +25,7 @@ public final class GJK {
 	 * and also used to simplify caching of GJK results.
 	 */
 	public final class State {
-		public final Vector3 v = new Vector3(1,1,1);
+		public final Vector3 v = new Vector3(10,10,10);
 		public final Vector3 w = new Vector3();
 		public final Vector3 p = new Vector3();
 		public final Vector3 q = new Vector3();
@@ -77,40 +77,41 @@ public final class GJK {
 	 */
 	public void run( SupportMap3 Sa, SupportMap3 Sb, Vector3 va, Vector3 vb, double envelope, double epsilon, int maxiter ) {		
 		// if v has become too small, reset it TODO check this
-		if (state.v.norm()<=envelope) {
-			state.v.assign(1,1,1);
+		if (state.v.norm()<epsilon) {
+			state.v.assign(10,10,10);
 		}
 
 		state.iterations = 0;
+		state.intersection = false;
     	final Vector3 v = state.v;
 		final Vector3 w = state.w;
 		final Vector3 sa = new Vector3();
 		final Vector3 sb = new Vector3();
     	
-		sa.assign( Sa.supportPoint(state.v.negate()));
-		sb.assign( Sb.supportPoint(state.v));	    							
-		w.assign( sa.sub(sb) );
+//		sa.assign( Sa.supportPoint(state.v.negate()));
+//		sb.assign( Sb.supportPoint(state.v));	    							
+//		w.assign( sa.sub(sb) );
 	
-		// initial separating axis test (distance is at least more than the envelope)
-		if ( v.normalize().dot(w) > envelope ) {
-			//return support points as approximations of closest points
-			va.assign(sa);
-			vb.assign(sb);
-			state.intersection = false;
-			return;
-		} 
+//		// initial separating axis test (distance is at least more than the envelope)
+//		if ( v.normalize().dot(w) > envelope ) {
+//			//return support points as approximations of closest points
+//			//va.assign(sa);
+//			//vb.assign(sb);
+//			//state.intersection = false;
+//			return;
+//		} 
 		
     	// initially update the simplex (often results in a quick termination)
     	if (state.simplexSize>0)
     		updateSimplex(state, Sa, Sb);
-    	
+//    	
     	// main loop
 		while ( true  ) {
 			state.iterations++;		
 //		    System.out.println("gjk iteration" + " " + v.norm()+ "  : " + state.simplexSize);
 //			v.print();
 			
-			// store points of convex objects a and b, and A-B (in A space)
+			// store points of convex objects a and b, and A-B 
 			sa.assign( Sa.supportPoint(state.v.negate()));
 			sb.assign( Sb.supportPoint(state.v));	    							
 			w.assign( sa.sub(sb) );
@@ -119,12 +120,6 @@ public final class GJK {
 			// ||v||2 -v.w is an upper bound for ||vk-v(A-B)||2 which converges towards zero as k goes large
 			if (  Math.abs(v.dot(v)-v.dot(w)) < epsilon*epsilon  || state.iterations>maxiter || state.simplexSize > 3 ) 
 				break;
-			
-			// separating axis test (distance is at least more than the envelope)
-			if ( v.normalize().dot(w) > envelope ) {
-				state.intersection = false;
-				break;
-			} 
 						
 			//add w to the simplices
 			Vector3[] row = state.simplices[state.permutation[state.simplexSize]];
@@ -139,7 +134,13 @@ public final class GJK {
 //				System.out.println("reject");
 				break;
 			}
-									
+			
+			// separating axis test (distance is at least more than the envelope)
+			if ( v.normalize().dot(w) > envelope ) {
+				state.intersection = false;
+				break;
+			} 
+			
 			//Calculate the vector v using lambda values
 			v.assignZero();
 			for (int i=0; i<state.simplexSize;i++) {
@@ -154,9 +155,10 @@ public final class GJK {
 		} //while true
 		
 		//Computing v, p, and q, closest points of A and B
-		state.v.assignZero(); state.p.assignZero(); state.q.assignZero(); 
+//		state.v.assignZero(); 
+		state.p.assignZero(); state.q.assignZero(); 
 		for (int i=0; i<state.simplexSize;i++) {
-			Vector3.add(state.v, state.simplices[state.permutation[i]][0].multiply(state.lambda[state.permutation[i]]));			
+//			Vector3.add(state.v, state.simplices[state.permutation[i]][0].multiply(state.lambda[state.permutation[i]]));			
 			Vector3.add(state.p, state.simplices[state.permutation[i]][1].multiply(state.lambda[state.permutation[i]]));
 			Vector3.add(state.q, state.simplices[state.permutation[i]][2].multiply(state.lambda[state.permutation[i]]));				
 		}
@@ -166,7 +168,7 @@ public final class GJK {
 		vb.assign(state.q);
 		
 		// check for intersection
-		if ( v.norm() < epsilon || va.sub(vb).norm() < epsilon || state.simplexSize > 3)
+		if ( va.sub(vb).norm() < epsilon || state.simplexSize > 3)
 			state.intersection = true;
 	}
 	

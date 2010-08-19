@@ -44,6 +44,20 @@ public final class UniformCapsule implements Geometry, SupportMap3, Material {
 		this.inertia.assignScale( Ixx, Ixx, 0.5*uniformmass*radius*radius); 
 	}
 	
+	/**
+	 * Get the radius value for this capsule
+	 */
+	public double getRadius() {
+		return radius;
+	}
+
+	/**
+	 * Get the length of this capsule
+	 */
+	public double getLength() {
+		return length;
+	}
+	
 	/*
 	 *  Geometry methods and members
 	 */

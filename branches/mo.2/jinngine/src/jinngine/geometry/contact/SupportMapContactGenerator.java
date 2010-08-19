@@ -208,16 +208,16 @@ public final class SupportMapContactGenerator implements ContactGenerator {
 		// run 2d intersection
 		ORourke.run(faceA, faceB, handler);
 		
-		if (contacts.size() == 0) {
-			System.out.println("contacts="+contacts.size()+" (" + faceA.size() +","+faceB.size()+")" );
-
-			// run 2d intersection
-			ORourke.run(faceA, faceB, handler);
-
-		}
-		
-		if (ga instanceof UniformCapsule && gb instanceof UniformCapsule )
-			System.out.println("contacts="+contacts.size() +"("+faceA.size()+","+faceB.size()+")");
+//		if (contacts.size() == 0) {
+//			System.out.println("contacts="+contacts.size()+" (" + faceA.size() +","+faceB.size()+")" );
+//
+//			// run 2d intersection
+//			ORourke.run(faceA, faceB, handler);
+//
+//		}
+//		
+//		if (ga instanceof UniformCapsule && gb instanceof UniformCapsule )
+//			System.out.println("contacts="+contacts.size() +"("+faceA.size()+","+faceB.size()+")");
 	}
 	
 	@Override

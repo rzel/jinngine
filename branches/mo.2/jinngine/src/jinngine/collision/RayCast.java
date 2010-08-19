@@ -55,7 +55,7 @@ public final class RayCast {
 		
 		// sphere swept volumes?
 		if (sweep) {
-			sphere = envelope + Sb.sphereSweepRadius() + (Sc!=null? Sc.sphereSweepRadius():0);
+			sphere = /*envelope*/ + Sb.sphereSweepRadius() + (Sc!=null? Sc.sphereSweepRadius():0);
 		} else {
 			sphere = 0;
 		}
@@ -91,6 +91,8 @@ public final class RayCast {
 		
 		while (true) {
 			iterations++;
+			System.out.println("RayCast: iter=" + iterations +" lambda="+lambda);
+
 			// run as many gjk iterations as necessary to get a separating axis. If the distance
 			// is within the envelope, run until the error in v is below epsilon. 
 			gjk.run(Sa, Sb, pc, pb, envelope+sphere, epsilon, 31);

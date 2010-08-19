@@ -171,90 +171,128 @@ public class ORourke {
 			final Vector3 p3 = poly2points.next();
 			final Vector3 p4 = poly2points.next();
 			final Vector3 par = new Vector3();
-			// line line intersection has a unique intersection point
-			if ( lineLineIntersection(p1, p2, p3, p4, par, /*0.1*/ epsilon)) {
-				// intersection in internal part of lines?
-				if (par.x>=-epsilon && par.x <=1+epsilon && par.y>=-epsilon && par.y<=1+epsilon) {
-					// report intersection
-					result.intersection(p1.add(p2.minus(p1).multiply(par.x)), p3.add(p4.minus(p3).multiply(par.y)));
-					// done
-					return;
-				} else {
-					// no intersection
-					return;
-				}
-			} else {
-				System.out.println("line-line: not intersection point");
-				// test if lines are separated
-				if (Math.abs(p2.minus(p1).cross(p4.minus(p1)).z) > 0.01/*epsilon*/ && false) {
-					// no intersection
-					return;
-				} else {
-					System.out.println("line line co incident");
-					// two co-incident lines has an edge intersection. We look for extremal points so
-					// l1(t) = l2(s) 
-					// p1+(p2-p1)t = p3+(p4-p3)s
-					// (p2-p1)t+(p3-p4)s = p3-p1
-					// (p2-p1)t+(p2-p1)k1 s = (p2-p1)k2
-					// where
-					// (p2-p1)k1 = (p3-p4) =>  k1 = (p3-p4)T(p2-p1)/(p2-p1)^2
-					// (p2-p1)k1 = (p3-p1) =>  k2 = (p3-p1)T(p2-p1)/(p2-p1)^2
-					//
-					// so 
-					// t = k2-k1s
-					// s = (k2-t)/k1
-					//
-					// our candidate points are t=0 and t=1 where 0<=s<=1, 
-					// likewise s=0 and s=1, where 0<=t<=1.				
-					final Vector3 p3p4 = p3.minus(p4);
-					final Vector3 p2p1 = p2.minus(p1);
-					final Vector3 p3p1 = p3.minus(p1);
-					final double k1 = p3p4.xydot(p2p1)/p2p1.squaredNorm();
-					final double k2 = p3p1.xydot(p2p1)/p2p1.squaredNorm();
-					int counter = 0;
-					
-					// case t=0
-					double s = (k2-0)/k1;
-					if ( -epsilon<=s && s<=1+epsilon ) {
-						// report intersection points
-						result.intersection(p1, p3.add(p4.minus(p3).multiply(s)));
-						counter=counter+1;
-					}
-					//case t=1
-					s = (k2-1)/k1;
-					if ( -epsilon<=s && s<=1+epsilon ) {
-						// report intersection points
-						result.intersection(p2, p3.add(p4.minus(p3).multiply(s)));
-						counter=counter+1;
-					}
-					
-					// termination
-					if (counter>1)
-						return;
-					
-					//case s=0
-					double t=k2;
-					if ( -epsilon<=t && t<=1+epsilon) {
-						// report intersection points
-						result.intersection(p2.add(p2p1.multiply(t)), p3);
-						counter=counter+1;
-					}
+//			// line line intersection has a unique intersection point
+//			if ( lineLineIntersection(p1, p2, p3, p4, par, /*0.1*/ epsilon)) {
+//				// intersection in internal part of lines?
+//				if (par.x>=-epsilon && par.x <=1+epsilon && par.y>=-epsilon && par.y<=1+epsilon) {
+//					// report intersection
+//					result.intersection(p1.add(p2.minus(p1).multiply(par.x)), p3.add(p4.minus(p3).multiply(par.y)));
+//					// done
+//					return;
+//				} else {
+//					// no intersection
+//					return;
+//				}
+//			} else {
+//				System.out.println("line-line: not intersection point");
+//				// test if lines are separated
+//				if (Math.abs(p2.minus(p1).cross(p4.minus(p1)).z) > 0.01/*epsilon*/ && false) {
+//					// no intersection
+//					return;
+//				} else {
+//					System.out.println("line line co incident");
+//					// two co-incident lines has an edge intersection. We look for extremal points so
+//					// l1(t) = l2(s) 
+//					// p1+(p2-p1)t = p3+(p4-p3)s
+//					// (p2-p1)t+(p3-p4)s = p3-p1
+//					// (p2-p1)t+(p2-p1)k1 s = (p2-p1)k2
+//					// where
+//					// (p2-p1)k1 = (p3-p4) =>  k1 = (p3-p4)T(p2-p1)/(p2-p1)^2
+//					// (p2-p1)k1 = (p3-p1) =>  k2 = (p3-p1)T(p2-p1)/(p2-p1)^2
+//					//
+//					// so 
+//					// t = k2-k1s
+//					// s = (k2-t)/k1
+//					//
+//					// our candidate points are t=0 and t=1 where 0<=s<=1, 
+//					// likewise s=0 and s=1, where 0<=t<=1.				
+//					final Vector3 p3p4 = p3.minus(p4);
+//					final Vector3 p2p1 = p2.minus(p1);
+//					final Vector3 p3p1 = p3.minus(p1);
+//					final double k1 = p3p4.xydot(p2p1)/p2p1.squaredNorm();
+//					final double k2 = p3p1.xydot(p2p1)/p2p1.squaredNorm();
+//					int counter = 0;
+//					
+//					// case t=0
+//					double s = (k2-0)/k1;
+//					if ( -epsilon<=s && s<=1+epsilon ) {
+//						// report intersection points
+//						result.intersection(p1, p3.add(p4.minus(p3).multiply(s)));
+//						counter=counter+1;
+//					}
+//					//case t=1
+//					s = (k2-1)/k1;
+//					if ( -epsilon<=s && s<=1+epsilon ) {
+//						// report intersection points
+//						result.intersection(p2, p3.add(p4.minus(p3).multiply(s)));
+//						counter=counter+1;
+//					}
+//					
+//					// termination
+//					if (counter>1)
+//						return;
+//					
+//					//case s=0
+//					double t=k2;
+//					if ( -epsilon<=t && t<=1+epsilon) {
+//						// report intersection points
+//						result.intersection(p2.add(p2p1.multiply(t)), p3);
+//						counter=counter+1;
+//					}
+//
+//					// termination
+//					if (counter>1)
+//						return;
+//
+//					
+//					//case s=1
+//					t=k2-k1;
+//					if ( -epsilon<=t && t<=1+epsilon) {
+//						// report intersection points
+//						result.intersection(p2.add(p2p1.multiply(t)), p4);
+//						counter=counter+1;
+//					}
+//				} // if co-incident intersection
+//			} // if non-unique intersection
+//			return;
+			
+			// alternative version
+			// l1(t) = p1+(p2-p1)t
+			// l2(s) = p3+(p4-p3)s 
+			//
+			final Vector3 p4p3 = p4.sub(p3);
+			final double s = 1/p4p3.xynorm();
+			final Vector3 p4p3hatnormed = new Vector3( -p4p3.y*s, p4p3.x*s, 0);
+			final Vector3 p1p3 = p1.sub(p3);
+			final Vector3 p2p1 = p2.sub(p1);
+			final double k1 = p2p1.xydot(p4p3hatnormed);
+			final double k2 = p1p3.xydot(p4p3hatnormed);
+			// 2. order poly
+			// t^2k1^2 + t 2k1k2 + k2^2 = epsilon^2
+			final double A = k1*k1;
+			final double B = 2*k1*k2;
+			final double C = k2*k2-1*1;
+			
+			final double d = B*B-4*A*C;
+			
+			System.out.println("(A,B,C,d) =" + A+","+B+","+C+","+d);
+			if (d>epsilon) {
+				final double t1 = (-B+Math.sqrt(d))/(2*A); 
+				final double t2 = (-B-Math.sqrt(d))/(2*A); 
+				System.out.println("(t1,t2)=("+t1+","+t2+")");				
+				Vector3 l1t1 = p1.add(p2p1.multiply(t1));
+				Vector3 l1t2 = p1.add(p2p1.multiply(t2));
+				System.out.println(l1t1+","+l1t2);
+				
+				final double s1 = (-l1t1.sub(p3).xydot(p3))/p4p3.xydot(l1t1.sub(p3));
+				final double s2 = (-l1t2.sub(p3).xydot(p3))/p4p3.xydot(l1t2.sub(p3));
 
-					// termination
-					if (counter>1)
-						return;
+				System.out.println("(s1,s2)=("+s1+","+s2+")");				
 
-					
-					//case s=1
-					t=k2-k1;
-					if ( -epsilon<=t && t<=1+epsilon) {
-						// report intersection points
-						result.intersection(p2.add(p2p1.multiply(t)), p4);
-						counter=counter+1;
-					}
-				} // if co-incident intersection
-			} // if non-unique intersection
+				
+			}
 			return;
+			
 		} // if line-line case
 
 		// line-poly

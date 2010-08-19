@@ -66,7 +66,7 @@ public final class RayCast {
 		if (Sc == null) {
 			Sa = new SupportMap3() {
 				@Override
-				public final Vector3 supportPoint(Vector3 direction) { return x.copy(); }
+				public final Vector3 supportPoint(Vector3 direction) { return new Vector3(x); }
 				@Override
 				public final void supportFeature(Vector3 d, List<Vector3> returnList) {}
 				@Override
@@ -102,7 +102,7 @@ public final class RayCast {
 				return Double.POSITIVE_INFINITY;
 			} else {
 				// move forward as much as possible, half way into the envelope 
-				Vector3 vs = v.minus(v.normalize().multiply(envelope*0.5+sphere));
+				Vector3 vs = v.sub(v.normalize().multiply(envelope*0.5+sphere));
 				lambda = lambda - vs.dot(w) / v.dot(direction);
 				x.assign(point.add(direction.multiply(lambda)));
 			}			

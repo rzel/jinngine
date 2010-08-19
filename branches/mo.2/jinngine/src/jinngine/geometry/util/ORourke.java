@@ -103,7 +103,7 @@ public class ORourke {
 			p.assign(poly1points.next());
 			q.assign(poly2points.next());
 			// report intersection
-			if ( p.minus(q).xynorm() < epsilon) 
+			if ( p.sub(q).xynorm() < epsilon)
 				result.intersection(p, q);
 			
 			return;
@@ -171,6 +171,7 @@ public class ORourke {
 			final Vector3 p3 = poly2points.next();
 			final Vector3 p4 = poly2points.next();
 			final Vector3 par = new Vector3();
+
 //			// line line intersection has a unique intersection point
 //			if ( lineLineIntersection(p1, p2, p3, p4, par, /*0.1*/ epsilon)) {
 //				// intersection in internal part of lines?
@@ -287,6 +288,7 @@ public class ORourke {
 				final double s1 = (-l1t1.sub(p3).xydot(p3))/p4p3.xydot(l1t1.sub(p3));
 				final double s2 = (-l1t2.sub(p3).xydot(p3))/p4p3.xydot(l1t2.sub(p3));
 
+
 				System.out.println("(s1,s2)=("+s1+","+s2+")");				
 
 				
@@ -303,7 +305,7 @@ public class ORourke {
 			final Vector3 p4 = poly2points.next();
 			final Vector3 p5 = poly2points.next();
 			// counter clock-wise normal
-			final Vector3 poly2normal = p5.minus(p3).cross(p3.minus(p4));
+			final Vector3 poly2normal = p5.sub(p3).cross(p3.sub(p4));
 			linePolyIntersection(p1, p2, poly2, poly2normal, result);
 			return;
 		}
@@ -317,7 +319,7 @@ public class ORourke {
 			final Vector3 p4 = poly1points.next();
 			final Vector3 p5 = poly1points.next();
 			// counter clock-wise normal
-			final Vector3 poly1normal = p5.minus(p3).cross(p3.minus(p4));
+			final Vector3 poly1normal = p5.sub(p3).cross(p3.sub(p4));
 			linePolyIntersection(p1, p2, poly1, poly1normal, new ResultHandler() {
 				public final void intersection(Vector3 arg0, Vector3 arg1) {
 					result.intersection(arg1, arg0);
@@ -352,8 +354,8 @@ public class ORourke {
 		q.assign(poly2points.next());
 		
 		// deltas
-		pd.assign( p.minus(pm));
-		qd.assign( q.minus(qm));
+		pd.assign( p.sub(pm));
+		qd.assign( q.sub(qm));
 
 		// run iterations
 		while (true) {
@@ -374,7 +376,7 @@ public class ORourke {
 					if (intersections > 1) {
 						// the firstIntersectionIter condition makes the algorithm able to handle some
 						// degenerate cases, as treated in the O'Rourke paper
-						if (firstIntersection.minus(ipp).xynorm() < epsilon && firstIntersectionIter!=iter-1) {
+						if (firstIntersection.sub(ipp).xynorm() < epsilon && firstIntersectionIter!=iter-1) {
 							// termination 
 							//System.out.println("intersection termination");
 							return;
@@ -420,7 +422,7 @@ public class ORourke {
 						poly2points = poly2.iterator();
 
 					q.assign(poly2points.next());
-					qd.assign( q.minus(qm));
+					qd.assign( q.sub(qm));
 				} else {
 					//advance p
 					if (inside == State.P)
@@ -436,7 +438,7 @@ public class ORourke {
 						poly1points = poly1.iterator();
 
 					p.assign(poly1points.next());
-					pd.assign( p.minus(pm));
+					pd.assign( p.sub(pm));
 				}
 			} else { // qd X pd < 0
 				if (isInHalfplane(q, pm, p)) {
@@ -454,7 +456,7 @@ public class ORourke {
 						poly1points = poly1.iterator();
 
 					p.assign(poly1points.next());
-					pd.assign( p.minus(pm));
+					pd.assign( p.sub(pm));
 				} else {
 					//advance q
 					if (inside == State.Q)
@@ -470,7 +472,7 @@ public class ORourke {
 						poly2points = poly2.iterator();
 
 					q.assign(poly2points.next());
-					qd.assign( q.minus(qm));
+					qd.assign( q.sub(qm));
 				}	
 			}
 
@@ -511,14 +513,14 @@ public class ORourke {
 			prev.assign(point);
 			return true;
 		} else if ( addedPoints < 2 ) {
-			if ( first.minus(point).xynorm()>epsilon) {
+			if ( first.sub(point).xynorm()>epsilon) {
 				prev.assign(point);
 				return true;
 			} else {
 				return false;
 			}
 		} else {
-			if ( first.minus(point).xynorm()>epsilon && prev.minus(point).xynorm()>epsilon ) {
+			if ( first.sub(point).xynorm()>epsilon && prev.sub(point).xynorm()>epsilon ) {
 				prev.assign(point);
 				return true;
 			} else {
@@ -536,13 +538,13 @@ public class ORourke {
 		//  t =  xT(p2-p1) - p1T(p2-p1) / (p2-p1)T(p2-p1)
 		//  t =  (x-p1)T(p2-p1) / |(p2-p1)|^2
 
-		final Vector3 p2p1 = p2.minus(p1);
+		final Vector3 p2p1 = p2.sub(p1);
 		p2p1.z = 0; // we only work in the xy plane
-		final double t = x.minus(p1).dot(p2p1) / p2p1.squaredNorm();	
+		final double t = x.sub(p1).dot(p2p1) / p2p1.squaredNorm();
 		if (t>= -epsilon && t <= 1+epsilon) {
 			// closest point on line
-			Vector3 lp = p1.add(p2.minus(p1).multiply(t));
-			if (  lp.minus(x).xynorm() < epsilon ) {
+			Vector3 lp = p1.add(p2.sub(p1).multiply(t));
+			if (  lp.sub(x).xynorm() < epsilon ) {
 				intPoint.assign(lp);
 				return true;
 			}
@@ -584,12 +586,12 @@ public class ORourke {
 				// internal on lines
 				if (0<=param.x && param.x<=1 && 0<=param.y && param.y<=1) {
 					// calculate intersection points (including the right z-coordinate)
-					final Vector3 ipp = p1.add(p2.minus(p1).multiply(param.x)); 
-					final Vector3 ipq = qm.add( q.minus(qm).multiply(param.y)); 
+					final Vector3 ipp = p1.add(p2.sub(p1).multiply(param.x));
+					final Vector3 ipq = qm.add( q.sub(qm).multiply(param.y));
 
 					switch (intersections) {
 					case 0:
-						if (out1.minus(ipp).norm() > epsilon) {
+						if (out1.sub(ipp).norm() > epsilon) {
 							out1.assign(ipp);
 							
 							//report
@@ -599,7 +601,7 @@ public class ORourke {
 						}
 						break;
 					case 1: 
-						if (out2.minus(ipp).norm() > epsilon) {
+						if (out2.sub(ipp).norm() > epsilon) {
 							out2.assign(ipp);
 							
 							//report
@@ -665,7 +667,7 @@ public class ORourke {
 	 * along the positive z axis
 	 */
 	private static final Vector3 projectToPlane( Vector3 point, Vector3 normal, Vector3 ref) {
-		return point.add(0,0,ref.minus(point).dot(normal)/normal.z);
+		return point.add(0,0,ref.sub(point).dot(normal)/normal.z);
 	}
 	
 	/**
@@ -676,7 +678,7 @@ public class ORourke {
 	 * @return
 	 */
 	public static final boolean isInHalfplane(final Vector3 a, final Vector3 bs, final Vector3 bt) {
-		return (bt.minus(bs)).cross(a.minus(bs)).z >= 0;
+		return (bt.sub(bs)).cross(a.sub(bs)).z >= 0;
 	}
 	
 	/**
@@ -689,7 +691,7 @@ public class ORourke {
 		final Vector3 p4 = poly.get(1);
 		final Vector3 p5 = poly.get(2);
 		// counter clock-wise normal
-		final Vector3 poly1normal = p5.minus(p3).cross(p3.minus(p4));
+		final Vector3 poly1normal = p5.sub(p3).cross(p3.sub(p4));
 		// return
 		normal.assign(poly1normal.normalize());
 	}
@@ -766,11 +768,11 @@ public class ORourke {
 		// b = 1/(pd.x*qd.y-pd.y*qd.x)( (-pd.y)*b.x + pd.x*b.y );
 		
 		// line deltas
-		Vector3 pd = pt.minus(ps);			
-		Vector3 qd = qs.minus(qt); // turned around, see derivation 
+		Vector3 pd = pt.sub(ps);
+		Vector3 qd = qs.sub(qt); // turned around, see derivation
 		
 		// the b-side in the equation in the comments above
-		Vector3 b = qs.minus(ps);
+		Vector3 b = qs.sub(ps);
 		
 		// determinant calculation
 		double det =  pd.x*qd.y-pd.y*qd.x;		

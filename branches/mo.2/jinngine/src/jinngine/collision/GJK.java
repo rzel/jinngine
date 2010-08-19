@@ -89,7 +89,7 @@ public final class GJK {
     	
 		sa.assign( Sa.supportPoint(state.v.negate()));
 		sb.assign( Sb.supportPoint(state.v));	    							
-		w.assign( sa.minus(sb) );
+		w.assign( sa.sub(sb) );
 	
 		// initial separating axis test (distance is at least more than the envelope)
 		if ( v.normalize().dot(w) > envelope ) {
@@ -113,7 +113,7 @@ public final class GJK {
 			// store points of convex objects a and b, and A-B (in A space)
 			sa.assign( Sa.supportPoint(state.v.negate()));
 			sb.assign( Sb.supportPoint(state.v));	    							
-			w.assign( sa.minus(sb) );
+			w.assign( sa.sub(sb) );
 
 			// termination condition
 			// ||v||2 -v.w is an upper bound for ||vk-v(A-B)||2 which converges towards zero as k goes large
@@ -166,7 +166,7 @@ public final class GJK {
 		vb.assign(state.q);
 		
 		// check for intersection
-		if ( v.norm() < epsilon || va.minus(vb).norm() < epsilon || state.simplexSize > 3)
+		if ( v.norm() < epsilon || va.sub(vb).norm() < epsilon || state.simplexSize > 3)
 			state.intersection = true;
 	}
 	
@@ -189,7 +189,7 @@ public final class GJK {
 			//store points of convex objects a and b, and A-B (in A space)
 			row[1].assign(Sa.supportPoint(state.simplices[i][3].negate()));
 			row[2].assign(Sb.supportPoint(state.simplices[i][3]));	    							
-			row[0].assign(row[1].minus(row[2]));
+			row[0].assign(row[1].sub(row[2]));
 			//row[4] = v.copy(); not needed
 			//state.simplexSize = ++state.permutation[4];
 		}
@@ -198,7 +198,7 @@ public final class GJK {
 		reduceSimplex( state );
 	
 		//Calculate the vector v
-		state.v.assign(Vector3.zero);
+		state.v.assign(new Vector3());
 		for (int i=0; i<state.simplexSize;i++) 
 			Vector3.add(state.v, state.simplices[state.permutation[i]][0].multiply( state.lambda[state.permutation[i]]));
 	}
@@ -217,7 +217,7 @@ public final class GJK {
 		final Vector3 sva = Sa.supportPoint(v) ;
 		//We need rotate the vector reverse in B space
 		final Vector3 svb = Sb.supportPoint(v.multiply(-1));   		
-		return sva.minus(svb);
+		return sva.sub(svb);
 	}
 	/**
 	 * Auxiliary function for swapping two elements in a permutation array.
@@ -268,8 +268,8 @@ public final class GJK {
 			final Vector3 y1 = row0[0]; 
 			final Vector3 y2 = row1[0]; 
 
-			final double d12_1 = y2.minus(y1).dot(y2); 
-			final double d12_2 = y1.minus(y2).dot(y1);
+			final double d12_1 = y2.sub(y1).dot(y2);
+			final double d12_2 = y1.sub(y2).dot(y1);
 			
 			//y1 (no permutation needed)
 			if ( d12_2 <= 0 ) {                  lambda[perm[0]] = 1;  state.simplexSize = 1; return false;}
@@ -307,20 +307,20 @@ public final class GJK {
 			final Vector3 y3 = row2[0];
 			
 			//y1, (no permutation)
-			final double d13_3 = y1.minus(y3).dot(y1);// d13_3 = Math.abs(d13_3)<epsilon?0:d13_3;
-			final double d12_2 = y1.minus(y2).dot(y1);// d12_2 = Math.abs(d12_2)<epsilon?0:d12_2;
+			final double d13_3 = y1.sub(y3).dot(y1);// d13_3 = Math.abs(d13_3)<epsilon?0:d13_3;
+			final double d12_2 = y1.sub(y2).dot(y1);// d12_2 = Math.abs(d12_2)<epsilon?0:d12_2;
 			if ( d12_2 <= 0 && d13_3 <=0 ) /*{Vector3.set(v,y1); return new Vector3[] {y1};}*/ 
 			{                 lambda[perm[0]]=1; state.simplexSize=1; return true; }
 
 			//y2 (2,1)
-			final double d12_1 = y2.minus(y1).dot(y2); //d12_1 = Math.abs(d12_1)<epsilon?0:d12_1;
-			final double d23_3 = y2.minus(y3).dot(y2); //d23_3 = Math.abs(d23_3)<epsilon?0:d23_3;
+			final double d12_1 = y2.sub(y1).dot(y2); //d12_1 = Math.abs(d12_1)<epsilon?0:d12_1;
+			final double d23_3 = y2.sub(y3).dot(y2); //d23_3 = Math.abs(d23_3)<epsilon?0:d23_3;
 			if ( d12_1 <= 0 && d23_3 <=0 ) //{Vector3.set(v,y2); return new Vector3[] {y2}; }
 			{ swap(1,0,perm); lambda[perm[0]]=1; state.simplexSize=1; return true; }
 				
 			//y3 (3,1)
-			final double d13_1 = y3.minus(y1).dot(y3); //d13_1 = Math.abs(d13_1)<epsilon?0:d13_1;
-			final double d23_2 = y3.minus(y2).dot(y3); //d23_2 = Math.abs(d23_2)<epsilon?0:d23_2;
+			final double d13_1 = y3.sub(y1).dot(y3); //d13_1 = Math.abs(d13_1)<epsilon?0:d13_1;
+			final double d23_2 = y3.sub(y2).dot(y3); //d23_2 = Math.abs(d23_2)<epsilon?0:d23_2;
 			if ( d23_2 <= 0 && d13_1 <=0 ) //{Vector3.set(v,y3); return new Vector3[] {y3}; }
 			{ swap(2,0,perm); lambda[perm[0]]=1; state.simplexSize=1; return true; }
 			
@@ -343,17 +343,17 @@ public final class GJK {
 			
 
 			//y2,y3 (2,1) (3,2)
-			final double d123_1 = d23_2 * y2.minus(y1).dot(y2) + d23_3 * y2.minus(y1).dot(y3); //d123_1 = Math.abs(d123_1)<epsilon?0:d123_1;
+			final double d123_1 = d23_2 * y2.sub(y1).dot(y2) + d23_3 * y2.sub(y1).dot(y3); //d123_1 = Math.abs(d123_1)<epsilon?0:d123_1;
 			if (d123_1 <= 0 && d23_2 > 0 && d23_3 > 0) //{Vector3.set(v,y2.multiply(d23_2/d23).Add(y3.multiply(d23_3/d23))); return new Vector3[] {y2,y3};}
 			{ swap(1,0,perm); swap(2,1,perm); lambda[perm[0]]=d23_2/d23; lambda[perm[1]]=d23_3/d23; state.simplexSize=2; return true; }
 			
 			//y1,y3 (3,2)
-			final double d123_2 = d13_1 * y1.minus(y2).dot(y1) + d13_3 * y1.minus(y2).dot(y3); //d123_2 = Math.abs(d123_2)<epsilon?0:d123_2;
+			final double d123_2 = d13_1 * y1.sub(y2).dot(y1) + d13_3 * y1.sub(y2).dot(y3); //d123_2 = Math.abs(d123_2)<epsilon?0:d123_2;
 			if (d123_2 <= 0 && d13_1 > 0 && d13_3 > 0) //{ Vector3.set(v,y1.multiply(d13_1/d13).Add(y3.multiply(d13_3/d13))); return new Vector3[] {y1,y3};}
 			{                 swap(2,1,perm); lambda[perm[0]]=d13_1/d13; lambda[perm[1]]=d13_3/d13; state.simplexSize=2; return true; }
 
 			//y1,y2 (no permutation)
-			final double d123_3 = d12_1 * y1.minus(y3).dot(y1) + d12_2 * y1.minus(y3).dot(y2); //d123_3 = Math.abs(d123_3)<epsilon?0:d123_3;
+			final double d123_3 = d12_1 * y1.sub(y3).dot(y1) + d12_2 * y1.sub(y3).dot(y2); //d123_3 = Math.abs(d123_3)<epsilon?0:d123_3;
 			if (d123_3 <= 0 && d12_1 > 0 && d12_2 > 0) //{ /*Vector3.set(v,y1.multiply(d12_1/d12).Add(y2.multiply(d12_2/d12)));*/ return null;  /*return new Vector3[] {y1,y2};*/ }
 			{                                 lambda[perm[0]]=d12_1/d12; lambda[perm[1]]=d12_2/d12; state.simplexSize=2; return false; }
 
@@ -390,30 +390,30 @@ public final class GJK {
 			final Vector3 y4 = row3[0];
 			
 			//y1 (no permutation)
-			final double d13_3 = y1.minus(y3).dot(y1); //d13_3= Math.abs(d13_3)<epsilon?0:d13_3;
-			final double d12_2 = y1.minus(y2).dot(y1); //d12_2= Math.abs(d12_2)<epsilon?0:d12_2;
-			final double d14_4 = y1.minus(y4).dot(y1); //d14_4= Math.abs(d14_4)<epsilon?0:d14_4;
+			final double d13_3 = y1.sub(y3).dot(y1); //d13_3= Math.abs(d13_3)<epsilon?0:d13_3;
+			final double d12_2 = y1.sub(y2).dot(y1); //d12_2= Math.abs(d12_2)<epsilon?0:d12_2;
+			final double d14_4 = y1.sub(y4).dot(y1); //d14_4= Math.abs(d14_4)<epsilon?0:d14_4;
 			if ( d12_2 <= 0 && d13_3 <=0 && d14_4 <=0 ) //{Vector3.set(v, y1); return new Vector3[] {y1}; }
 			{                lambda[perm[0]] = 1; state.simplexSize=1; return true; }
 			
 			//y2 (2,1)
-			final double d12_1 = y2.minus(y1).dot(y2); //d12_1= Math.abs(d12_1)<epsilon?0:d12_1;
-			final double d23_3 = y2.minus(y3).dot(y2); //d23_3= Math.abs(d23_3)<epsilon?0:d23_3;
-			final double d24_4 = y2.minus(y4).dot(y2); //d24_4= Math.abs(d24_4)<epsilon?0:d24_4;
+			final double d12_1 = y2.sub(y1).dot(y2); //d12_1= Math.abs(d12_1)<epsilon?0:d12_1;
+			final double d23_3 = y2.sub(y3).dot(y2); //d23_3= Math.abs(d23_3)<epsilon?0:d23_3;
+			final double d24_4 = y2.sub(y4).dot(y2); //d24_4= Math.abs(d24_4)<epsilon?0:d24_4;
 			if ( d12_1 <= 0 && d23_3 <=0 && d24_4 <= 0) //{Vector3.set(v, y2); return new Vector3[] {y2}; }
 			{ swap(1,0,perm); lambda[perm[0]] = 1; state.simplexSize=1; return true; }
 
 			//y3 (3,1)
-			final double d13_1 = y3.minus(y1).dot(y3); //d13_1= Math.abs(d13_1)<epsilon?0:d13_1;
-			final double d23_2 = y3.minus(y2).dot(y3); //d23_2= Math.abs(d23_2)<epsilon?0:d23_2;
-			final double d34_4 = y3.minus(y4).dot(y3); //d34_4= Math.abs(d34_4)<epsilon?0:d34_4;
+			final double d13_1 = y3.sub(y1).dot(y3); //d13_1= Math.abs(d13_1)<epsilon?0:d13_1;
+			final double d23_2 = y3.sub(y2).dot(y3); //d23_2= Math.abs(d23_2)<epsilon?0:d23_2;
+			final double d34_4 = y3.sub(y4).dot(y3); //d34_4= Math.abs(d34_4)<epsilon?0:d34_4;
 			if ( d23_2 <= 0 && d13_1 <=0 && d34_4 <=0 ) //{Vector3.set(v, y3); return new Vector3[] {y3}; }
 			{ swap(2,0,perm); lambda[perm[0]] = 1; state.simplexSize=1; return true; }
 
 			//y4 (4,1)
-			final double d14_1 = y4.minus(y1).dot(y4); //d14_1= Math.abs(d14_1)<epsilon?0:d14_1;
-			final double d24_2 = y4.minus(y2).dot(y4); //d24_2= Math.abs(d24_2)<epsilon?0:d24_2;
-			final double d34_3 = y4.minus(y3).dot(y4); //d34_3= Math.abs(d34_3)<epsilon?0:d34_3;
+			final double d14_1 = y4.sub(y1).dot(y4); //d14_1= Math.abs(d14_1)<epsilon?0:d14_1;
+			final double d24_2 = y4.sub(y2).dot(y4); //d24_2= Math.abs(d24_2)<epsilon?0:d24_2;
+			final double d34_3 = y4.sub(y3).dot(y4); //d34_3= Math.abs(d34_3)<epsilon?0:d34_3;
 			if ( d14_1 <= 0 && d24_2 <=0 && d34_3 <=0 ) //{Vector3.set(v, y4); return new Vector3[] {y4}; }
 			{ swap(3,0,perm); lambda[perm[0]] = 1; state.simplexSize=1; return true; }
 
@@ -433,8 +433,8 @@ public final class GJK {
 //			}
 
 			//y1,y2 (no permutation)
-			final double d123_3 = d12_1 * y1.minus(y3).dot(y1) + d12_2 * y1.minus(y3).dot(y2); //d123_3= Math.abs(d123_3)<epsilon?0:d123_3;
-			final double d124_4 = d12_1 * y1.minus(y4).dot(y1) + d12_2 * y1.minus(y4).dot(y2); //d124_4= Math.abs(d124_4)<epsilon?0:d124_4;
+			final double d123_3 = d12_1 * y1.sub(y3).dot(y1) + d12_2 * y1.sub(y3).dot(y2); //d123_3= Math.abs(d123_3)<epsilon?0:d123_3;
+			final double d124_4 = d12_1 * y1.sub(y4).dot(y1) + d12_2 * y1.sub(y4).dot(y2); //d124_4= Math.abs(d124_4)<epsilon?0:d124_4;
 			//System.out.println("d123_3: " + d123_3 + " d124_4: " + d124_4);
 			if( d12_1 > 0 && d12_2 > 0 && d123_3 <=0 && d124_4 <=0) {
 //				Vector3.set(v, y1.multiply(d12_1/d12).Add(y2.multiply(d12_2/d12)));
@@ -445,8 +445,8 @@ public final class GJK {
 			}
 
 			//y1, y3 (3,2)
-			final double d123_2 = d13_1 * y1.minus(y2).dot(y1) + d13_3 * y1.minus(y2).dot(y3); //d123_2= Math.abs(d123_2)<epsilon?0:d123_2;
-			final double d134_4 = d13_1 * y1.minus(y4).dot(y1) + d13_3 * y1.minus(y4).dot(y3); //d134_4= Math.abs(d134_4)<epsilon?0:d134_4;
+			final double d123_2 = d13_1 * y1.sub(y2).dot(y1) + d13_3 * y1.sub(y2).dot(y3); //d123_2= Math.abs(d123_2)<epsilon?0:d123_2;
+			final double d134_4 = d13_1 * y1.sub(y4).dot(y1) + d13_3 * y1.sub(y4).dot(y3); //d134_4= Math.abs(d134_4)<epsilon?0:d134_4;
 			//System.out.println("d123_2: " + d123_2 + " d134_4: " + d134_4);
 			if( d13_1 > 0 && d13_3 > 0 && d123_2 <=0 && d134_4 <=0) {				
 //				Vector3.set(v, y1.multiply(d13_1/d13).Add(y3.multiply(d13_3/d13)));
@@ -459,8 +459,8 @@ public final class GJK {
 			}
 
 			//y1, y4 (4,2)
-			final double d124_2 = d14_1 * y1.minus(y2).dot(y1) + d14_4 * y1.minus(y2).dot(y4); //d124_2= Math.abs(d124_2)<epsilon?0:d124_2;
-			final double d134_3 = d14_1 * y1.minus(y3).dot(y1) + d14_4 * y1.minus(y3).dot(y4); //d134_3= Math.abs(d134_3)<epsilon?0:d134_3;
+			final double d124_2 = d14_1 * y1.sub(y2).dot(y1) + d14_4 * y1.sub(y2).dot(y4); //d124_2= Math.abs(d124_2)<epsilon?0:d124_2;
+			final double d134_3 = d14_1 * y1.sub(y3).dot(y1) + d14_4 * y1.sub(y3).dot(y4); //d134_3= Math.abs(d134_3)<epsilon?0:d134_3;
 			//System.out.println("d124_2: " + d124_2 + " d134_3: " + d134_3);
 			if( d14_1 > 0 && d14_4 > 0 && d124_2 <=0 && d134_3 <=0) {
 //				Vector3.set(v, y1.multiply(d14_1/d14).Add(y4.multiply(d14_4/d14)));
@@ -473,8 +473,8 @@ public final class GJK {
 			}
 
 			//y2,y3 (2,1) (3,2)
-			final double d123_1 = d23_2 * y2.minus(y1).dot(y2) + d23_3 * y2.minus(y1).dot(y3); //d123_1= Math.abs(d123_1)<epsilon?0:d123_1;
-			final double d234_4 = d23_2 * y2.minus(y4).dot(y2) + d23_3 * y2.minus(y4).dot(y3); //d234_4= Math.abs(d234_4)<epsilon?0:d234_4;
+			final double d123_1 = d23_2 * y2.sub(y1).dot(y2) + d23_3 * y2.sub(y1).dot(y3); //d123_1= Math.abs(d123_1)<epsilon?0:d123_1;
+			final double d234_4 = d23_2 * y2.sub(y4).dot(y2) + d23_3 * y2.sub(y4).dot(y3); //d234_4= Math.abs(d234_4)<epsilon?0:d234_4;
 			//System.out.println("d123_1: " + d123_1 + " d234_4: " + d234_4);
 			if( d23_2 > 0 && d23_3 > 0 && d123_1 <=0 && d234_4 <=0) {
 //				Vector3.set(v, y2.multiply(d23_2/d23).Add(y3.multiply(d23_3/d23)));
@@ -487,8 +487,8 @@ public final class GJK {
 			}
 
 			//y2,y4 (2,1) (4,2)
-			final double d124_1 = d24_2 * y2.minus(y1).dot(y2) + d24_4 * y2.minus(y1).dot(y4); //d124_1= Math.abs(d124_1)<epsilon?0:d124_1;
-			final double d234_3 = d24_2 * y2.minus(y3).dot(y2) + d24_4 * y2.minus(y3).dot(y4); //d234_3= Math.abs(d234_3)<epsilon?0:d234_3;
+			final double d124_1 = d24_2 * y2.sub(y1).dot(y2) + d24_4 * y2.sub(y1).dot(y4); //d124_1= Math.abs(d124_1)<epsilon?0:d124_1;
+			final double d234_3 = d24_2 * y2.sub(y3).dot(y2) + d24_4 * y2.sub(y3).dot(y4); //d234_3= Math.abs(d234_3)<epsilon?0:d234_3;
 			//System.out.println("d124_1: " + d124_1 + " d234_3: " + d234_3);
 			if( d24_2 > 0 && d24_4 > 0 && d124_1 <=0 && d234_3 <=0) {
 //				Vector3.set(v, y2.multiply(d24_2/d24).Add(y4.multiply(d24_4/d24)));
@@ -501,8 +501,8 @@ public final class GJK {
 			}
 
 			//y3,y4 (3,1) (2,4)
-			final double d134_1 = d34_3 * y3.minus(y1).dot(y3) + d34_4 * y3.minus(y1).dot(y4); //d134_1= Math.abs(d134_1)<epsilon?0:d134_1;
-			final double d234_2 = d34_3 * y3.minus(y2).dot(y3) + d34_4 * y3.minus(y2).dot(y4); //d234_2= Math.abs(d234_2)<epsilon?0:d234_2;
+			final double d134_1 = d34_3 * y3.sub(y1).dot(y3) + d34_4 * y3.sub(y1).dot(y4); //d134_1= Math.abs(d134_1)<epsilon?0:d134_1;
+			final double d234_2 = d34_3 * y3.sub(y2).dot(y3) + d34_4 * y3.sub(y2).dot(y4); //d234_2= Math.abs(d234_2)<epsilon?0:d234_2;
 			//System.out.println("d134_1: " + d134_1 + " d234_2: " + d234_2);
 			if( d34_3 > 0 && d34_4 > 0 && d134_1 <=0 && d234_2 <=0) {
 //				Vector3.set(v, y3.multiply(d34_3/d34).Add(y4.multiply(d34_4/d34)));
@@ -515,7 +515,7 @@ public final class GJK {
 			}
 
 			//y1,y2,y3 (no permutation)
-			final double d1234_4 = d123_1 * (y1.minus(y4).dot(y1)) + d123_2 * (y1.minus(y4).dot(y2) ) + d123_3 * (y1.minus(y4).dot(y3));
+			final double d1234_4 = d123_1 * (y1.sub(y4).dot(y1)) + d123_2 * (y1.sub(y4).dot(y2) ) + d123_3 * (y1.sub(y4).dot(y3));
 			//d1234_4 = Math.abs(d1234_4)<epsilon?0:d1234_4;
 			if ( d123_1 > 0 && d123_2 > 0 && d123_3 > 0 && d1234_4 <= 0) {
 				final double d123 = d123_1 + d123_2 + d123_3;
@@ -529,7 +529,7 @@ public final class GJK {
 			}
 
 			//y1,y2,y4 (4,3)
-			final double d1234_3 = d124_1 * (y1.minus(y3).dot(y1)) + d124_2 * (y1.minus(y3).dot(y2) ) + d124_4 * (y1.minus(y3).dot(y4));
+			final double d1234_3 = d124_1 * (y1.sub(y3).dot(y1)) + d124_2 * (y1.sub(y3).dot(y2) ) + d124_4 * (y1.sub(y3).dot(y4));
 			//d1234_3 = Math.abs(d1234_3)<epsilon?0:d1234_3;
 			if ( d124_1 > 0 && d124_2 > 0 && d124_4 > 0 && d1234_3 <= 0) { 
 				final double d124 = d124_1 + d124_2 + d124_4;
@@ -543,7 +543,7 @@ public final class GJK {
 			}
 
 			//y1,y3,y4 (3,2) (4,3)
-			final double d1234_2 = d134_1 * (y1.minus(y2).dot(y1)) + d134_3 * (y1.minus(y2).dot(y3) ) + d134_4 * (y1.minus(y2).dot(y4));
+			final double d1234_2 = d134_1 * (y1.sub(y2).dot(y1)) + d134_3 * (y1.sub(y2).dot(y3) ) + d134_4 * (y1.sub(y2).dot(y4));
 			//d1234_2 = Math.abs(d1234_2)<epsilon?0:d1234_2;
 			if ( d134_1 > 0 && d134_3 > 0 && d134_4 > 0 && d1234_2 <= 0) { 
 				final double d134 = d134_1 + d134_3 + d134_4;
@@ -557,7 +557,7 @@ public final class GJK {
 			}
 
 			//y2,y3,y4 (2,1)(3,2)(4,3)
-			final double d1234_1 = d234_2 * (y2.minus(y1).dot(y2)) + d234_3 * (y2.minus(y1).dot(y3) ) + d234_4 * (y2.minus(y1).dot(y4));
+			final double d1234_1 = d234_2 * (y2.sub(y1).dot(y2)) + d234_3 * (y2.sub(y1).dot(y3) ) + d234_4 * (y2.sub(y1).dot(y4));
 			//d1234_1 = Math.abs(d1234_1)<epsilon?0:d1234_1;
 			if ( d234_2 > 0 && d234_3 > 0 && d234_4 > 0 && d1234_1 <= 0) {
 				final double d234 = d234_2 + d234_3 + d234_4;

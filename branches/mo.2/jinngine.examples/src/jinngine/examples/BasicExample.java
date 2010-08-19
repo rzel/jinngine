@@ -47,29 +47,11 @@ public class BasicExample implements Rendering.Callback {
 
 		Body right = new Body( "right", new Box(20,200,200));		
 		right.setPosition(new Vector3(10,0,0));
-		right.setFixed(true);
+		right.setFixed(true);		
 		
-		// create a box
-		UniformCapsule capgeo = new UniformCapsule(1,6);
-		Body cap = new Body( "cap", capgeo );
-		cap.setPosition(new Vector3(-10,-11,-25));
-
-		UniformCapsule capgeo2 = new UniformCapsule(1,6);
-		Body cap2 = new Body( "cap2", capgeo2 );
-		cap2.setPosition(new Vector3(-10,-11,-25));
-
-		
-		Box boxgeometry = new Box(6,1,1);
+		Box boxgeometry = new Box(6,6,6);
 		Body box = new Body( "box", boxgeometry );
 		box.setPosition(new Vector3(-10,-11,-25));
-		
-		Box boxgeometry2 = new Box(6,1,1);
-		Body box2 = new Body( "box2", boxgeometry2 );
-		box2.setPosition(new Vector3(-10,-11,-25));
-
-		
-//		box.state.anisotropicmass.assignScale(8,8,99);
-//		box.state.inverseanisotropicmass.assignScale(1.0/16,1.0/8,1.0/99);
 				
 		// add all to scene
 		scene.addBody(floor);
@@ -78,24 +60,13 @@ public class BasicExample implements Rendering.Callback {
 		scene.addBody(left);
 		scene.addBody(right);
 		scene.addBody(box);
-		scene.addBody(box2);
-
-		scene.addBody(cap);
-		scene.addBody(cap2);
 
 		// put gravity on box
 		scene.addForce( new GravityForce(box));		
-		scene.addForce( new GravityForce(cap));		
-		scene.addForce( new GravityForce(cap2));		
-//		scene.addForce( new GravityForce(box2));		
 		
 		// handle drawing
 		Rendering rendering = new jinngine.rendering.jogl.JoglRendering(this, new Interaction(scene));
 		rendering.drawMe(boxgeometry);
-		rendering.drawMe(boxgeometry2);
-
-		rendering.drawMe(capgeo);
-		rendering.drawMe(capgeo2);
 
 		rendering.start();
 	}
@@ -109,5 +80,4 @@ public class BasicExample implements Rendering.Callback {
 	public static void main( String[] args) {
 		new BasicExample();
 	}
-
 }

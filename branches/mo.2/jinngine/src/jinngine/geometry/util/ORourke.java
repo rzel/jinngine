@@ -258,41 +258,83 @@ public class ORourke {
 //			return;
 			
 			// alternative version
-			// l1(t) = p1+(p2-p1)t
-			// l2(s) = p3+(p4-p3)s 
-			//
+			// the two lines are
+			// l1(t) = p1 + (p2-p1)t
+			// l2(s) = p3 + (p4-p3)s
+
+			// if lines are orthogonal, use the unique
+			
+			// we require (p4-p3)T(p2-p1) > 0. if not, swap p3 and p4
+			if ( p4.sub(p3).xydot(p2.sub(p1))<0) {
+				Vector3 tmp = new Vector3(p3);
+				p3.assign(p4);
+				p4.assign(tmp);
+			}			
+			
+			final double e = 0.1;
 			final Vector3 p4p3 = p4.sub(p3);
-			final double s = 1/p4p3.xynorm();
-			final Vector3 p4p3hatnormed = new Vector3( -p4p3.y*s, p4p3.x*s, 0);
-			final Vector3 p1p3 = p1.sub(p3);
 			final Vector3 p2p1 = p2.sub(p1);
-			final double k1 = p2p1.xydot(p4p3hatnormed);
-			final double k2 = p1p3.xydot(p4p3hatnormed);
-			// 2. order poly
-			// t^2k1^2 + t 2k1k2 + k2^2 = epsilon^2
-			final double A = k1*k1;
-			final double B = 2*k1*k2;
-			final double C = k2*k2-1*1;
+			final Vector3 p3p1 = p3.sub(p1);
+			// d is the normalised tangent of l2
+			final double p4p3n =p4p3.xynorm();
+			final Vector3 d = new Vector3( -p4p3.y/p4p3n, p4p3.x/p4p3n, 0 );
 			
-			final double d = B*B-4*A*C;
-			
-			System.out.println("(A,B,C,d) =" + A+","+B+","+C+","+d);
-			if (d>epsilon) {
-				final double t1 = (-B+Math.sqrt(d))/(2*A); 
-				final double t2 = (-B-Math.sqrt(d))/(2*A); 
-				System.out.println("(t1,t2)=("+t1+","+t2+")");				
-				Vector3 l1t1 = p1.add(p2p1.multiply(t1));
-				Vector3 l1t2 = p1.add(p2p1.multiply(t2));
-				System.out.println(l1t1+","+l1t2);
-				
-				final double s1 = (-l1t1.sub(p3).xydot(p3))/p4p3.xydot(l1t1.sub(p3));
-				final double s2 = (-l1t2.sub(p3).xydot(p3))/p4p3.xydot(l1t2.sub(p3));
-
-
-				System.out.println("(s1,s2)=("+s1+","+s2+")");				
-
-				
+			// if lines are not parallel, we can compute two points on l1 where
+			// its distance to l2 is equal to e
+			final double z = p2p1.dot(d);
+			double tlow;
+			double thigh;
+			if (Math.abs(z)>epsilon) {
+				// TODO include derivation
+				tlow = (-e+p3p1.xydot(d))/z;
+				thigh = (e+p3p1.xydot(d))/z;
+				// enforce t1<t2
+				if (thigh<tlow) {
+					final double t = tlow;
+					tlow=thigh;
+					thigh=t;
+				}
+			} else {
+				// if lines are parallel, we send tlow and thigh to their limits
+				tlow = Double.NEGATIVE_INFINITY;
+				thigh = Double.POSITIVE_INFINITY;
 			}
+
+			System.out.println("z="+z);
+			System.out.println("p4p3norm="+p4p3n);
+			System.out.println("p2p1 norm="+p2p1.xynorm());
+
+			System.out.println("(tlow,thigh)=("+tlow+","+thigh+")");
+
+			// transform t <-> s
+			final double k1 = (1/(p4p3n*p4p3n))*p4p3.xydot(p1.sub(p3));
+			final double k2 = (1/(p4p3n*p4p3n))*p4p3.xydot(p2p1);
+
+			System.out.println("(k1,k2)=("+k1+","+k2+")");
+
+			// all candidate points end-points
+			final double slow = k1+k2*tlow;
+			final double st0 = k1;
+			final double s0 = 0;
+			final double shigh = k1+k2*thigh;
+			final double st1 = k1+k2;
+			final double s1 = 1;
+
+			// highest possible plow
+			double plow = slow>st0? (slow>s0? slow:s0) : (st0>s0? st0:s0);
+			// smallest possible phigh
+			double phigh = shigh<st1? (shigh<s1? shigh:s1) : (st1<s1? st1:s1);
+
+			// generate intersections
+			if ( Math.abs(plow-phigh) < epsilon) {
+				result.intersection(p1.add(p2p1.multiply((plow-k1)/k2)), p3.add(p4.sub(p3).multiply(plow)));					
+			} else if ( plow < phigh) {
+				result.intersection(p1.add(p2p1.multiply((plow-k1)/k2)), p3.add(p4.sub(p3).multiply(plow)));
+				result.intersection(p1.add(p2p1.multiply((phigh-k1)/k2)), p3.add(p4.sub(p3).multiply(phigh)));
+			}
+
+			System.out.println("(plow,phigh)=("+plow+","+phigh+")");
+
 			return;
 			
 		} // if line-line case

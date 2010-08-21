@@ -9,7 +9,7 @@
 package jinngine.physics.constraint.contact;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,9 +23,6 @@ import jinngine.geometry.contact.SphereContactGenerator;
 import jinngine.geometry.contact.SupportMapContactGenerator;
 import jinngine.geometry.contact.SupportMapSphereContactGenerator;
 import jinngine.physics.constraint.Constraint;
-import jinngine.physics.constraint.contact.ContactConstraint;
-import jinngine.physics.constraint.contact.ContactConstraintCreator;
-import jinngine.physics.constraint.contact.FrictionalContactConstraint;
 import jinngine.util.ComponentGraph;
 import jinngine.util.Pair;
 
@@ -48,8 +45,8 @@ public class DefaultContactConstraintManager implements ContactConstraintManager
 	private final List<ContactConstraintCreator> contactConstraintCreators = new ArrayList<ContactConstraintCreator>();
 
 	// set of maintained contact constraints and generators
-	private final Map<Pair<Body>,ContactConstraint> contactConstraints = new LinkedHashMap<Pair<Body>,ContactConstraint>();
-	private final Map<Pair<Geometry>,ContactGenerator> contactGenerators = new LinkedHashMap<Pair<Geometry>,ContactGenerator>();
+	private final Map<Pair<Body>,ContactConstraint> contactConstraints = new HashMap<Pair<Body>,ContactConstraint>();
+	private final Map<Pair<Geometry>,ContactGenerator> contactGenerators = new HashMap<Pair<Geometry>,ContactGenerator>();
 		
 	// the constraint graph to be updated by this contact constraint manager
 	private final ComponentGraph<Body,Constraint, DefaultScene.ConstraintGroup> constraintGraph;

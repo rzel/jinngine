@@ -31,12 +31,8 @@ public class ContactTrigger implements Trigger {
 	private final double impulsethreshold;
 	private final Callback callback;
 
-	// helper variables
-	private double totalforce = 0;		
-	private int numberOfNcpConstraints = 0;
-
 	// handler to install in the contact constraint manager
-	private ContactConstraintManager.Handler contactConstraintHandler;
+	private final ContactConstraintManager.Handler contactConstraintHandler;
 
 	// constraints that have not triggered an event
 	private final List<ContactConstraint> monitoredconstraints = new ArrayList<ContactConstraint>();
@@ -59,6 +55,40 @@ public class ContactTrigger implements Trigger {
 		this.body = body;
 		this.impulsethreshold = impulsethreshold;
 		this.callback = callback;
+
+                // setup a handler that tells us when contact constraints are created and deleted
+		contactConstraintHandler = new ContactConstraintManager.Handler() {
+			@Override
+			public void contactConstraintCreated(Pair<Body> bodies, ContactConstraint contact) {
+//				System.out.println("created");
+				// if the constraint involves the body that we are monitoring, add it to our
+				// internal list of contact constraints
+				if (bodies.contains(ContactTrigger.this.body)) {
+					monitoredconstraints.add(contact);
+				}
+			}
+			@Override
+			public void contactConstraintRemoved(Pair<Body> bodies, ContactConstraint contact ) {
+//				System.out.println("deleted");
+
+				if (bodies.contains(ContactTrigger.this.body)) {
+					// if we had this constraint on our list of triggerd constraints, signal an event
+					if (triggeredconstraints.remove(contact)) {
+
+						// perform the call back
+						Body interacting = bodies.getFirst()==ContactTrigger.this.body? bodies.getSecond(): bodies.getFirst();
+						ContactTrigger.this.callback.contactBelowThreshold(interacting, contact);
+					}
+
+
+					// if the constraint is just on the monitor list, simply remove it
+                                       	monitoredconstraints.remove(contact);
+
+
+				} // if contains body
+			}
+		};
+
 	}
 	
 	@Override
@@ -69,15 +99,13 @@ public class ContactTrigger implements Trigger {
 		ListIterator<ContactConstraint> monitored = monitoredconstraints.listIterator(); 
 		while ( monitored.hasNext() ) {
 			ContactConstraint constraint = monitored.next();
-			totalforce = 0;
-			numberOfNcpConstraints = 0;
+			double totalforce = 0;
 
 			// sum up the applied contact force
 			Iterator<NCPConstraint> ncps = constraint.getNcpConstraints();
 			while(ncps.hasNext()) {
 				NCPConstraint ncp = ncps.next();
 				totalforce += ncp.lambda;
-				numberOfNcpConstraints += 1;
 			}
 
 			// check condition
@@ -100,15 +128,13 @@ public class ContactTrigger implements Trigger {
 		while ( triggered.hasNext()) {
 
 			ContactConstraint constraint = triggered.next();
-			totalforce = 0;
-			numberOfNcpConstraints = 0;
+			double totalforce = 0;
 
 			// sum up the applied contact force
 			Iterator<NCPConstraint> ncps = constraint.getNcpConstraints();
 			while(ncps.hasNext()) {
 				NCPConstraint ncp = ncps.next();
 				totalforce += ncp.lambda;
-				numberOfNcpConstraints += 1;
 			}
 
 			// check condition
@@ -145,44 +171,6 @@ public class ContactTrigger implements Trigger {
 				monitoredconstraints.add((ContactConstraint)constraint);
 			}
 		}// while constraints
-		
-		// setup a handler that tells us when contact constraints are created and deleted
-		contactConstraintHandler = new ContactConstraintManager.Handler() {
-			@Override
-			public void contactConstraintCreated(Pair<Body> bodies, ContactConstraint contact) {
-//				System.out.println("created");
-				// if the constraint involves the body that we are monitoring, add it to our
-				// internal list of contact constraints
-				if (bodies.contains(body)) {
-					monitoredconstraints.add(contact);
-				}
-			}
-			@Override
-			public void contactConstraintRemoved(Pair<Body> bodies, ContactConstraint contact ) {
-//				System.out.println("deleted");
-
-				if (bodies.contains(body)) {
-					// if we had this constraint on our list of triggerd constraints, signal an event
-					if (triggeredconstraints.contains(contact)) {
-
-						// perform the call back 
-						Body interacting = bodies.getFirst()==body? bodies.getSecond(): bodies.getFirst();
-						callback.contactBelowThreshold(interacting, contact);
-
-						// remove from internal list
-						triggeredconstraints.remove(contact);
-					}
-
-
-					// if the constraint is just on the monitor list, simply remove it
-					if (monitoredconstraints.contains(contact)) {
-						// remove from monitor list
-						monitoredconstraints.remove(contact);
-					}
-					
-				} // if contains body
-			}
-		};
 		
 		// install the handler
 		ContactConstraintManager manager = scene.getContactConstraintManager();		

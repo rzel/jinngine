@@ -87,29 +87,15 @@ public final class GJK {
 		final Vector3 w = state.w;
 		final Vector3 sa = new Vector3();
 		final Vector3 sb = new Vector3();
-    	
-//		sa.assign( Sa.supportPoint(state.v.negate()));
-//		sb.assign( Sb.supportPoint(state.v));	    							
-//		w.assign( sa.sub(sb) );
-	
-//		// initial separating axis test (distance is at least more than the envelope)
-//		if ( v.normalize().dot(w) > envelope ) {
-//			//return support points as approximations of closest points
-//			//va.assign(sa);
-//			//vb.assign(sb);
-//			//state.intersection = false;
-//			return;
-//		} 
-		
+    			
     	// initially update the simplex (often results in a quick termination)
     	if (state.simplexSize>0)
     		updateSimplex(state, Sa, Sb);
-//    	
+
     	// main loop
 		while ( true  ) {
 			state.iterations++;		
 //		    System.out.println("gjk iteration" + " " + v.norm()+ "  : " + state.simplexSize);
-//			v.print();
 			
 			// store points of convex objects a and b, and A-B 
 			sa.assign( Sa.supportPoint(state.v.negate()));
@@ -131,7 +117,6 @@ public final class GJK {
 			
 			if ( !reduceSimplex( state ) ) {
 				//latest w vector was rejected, we consequently terminate (simplex cannot chance from here on)
-//				System.out.println("reject");
 				break;
 			}
 			
@@ -149,7 +134,6 @@ public final class GJK {
 
 			//Check for a penetrating state
 			if ( v.norm() < epsilon || state.simplexSize > 3 ) {
-//				System.out.println("penetration");
 				break;				
 			}
 		} //while true
@@ -193,7 +177,6 @@ public final class GJK {
 			row[2].assign(Sb.supportPoint(state.simplices[i][3]));	    							
 			row[0].assign(row[1].sub(row[2]));
 			//row[4] = v.copy(); not needed
-			//state.simplexSize = ++state.permutation[4];
 		}
 
 		//recompute the simplex and lambda values

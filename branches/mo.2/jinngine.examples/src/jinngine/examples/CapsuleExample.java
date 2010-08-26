@@ -61,9 +61,13 @@ public class CapsuleExample implements Rendering.Callback {
 		UniformCapsule capgeo3 = new UniformCapsule(1.6,4);
 		Body cap3 = new Body( "cap3", capgeo3 );
 		cap3.setPosition(new Vector3(-10,-11,-25));
-		
+
+		UniformCapsule capgeo4 = new UniformCapsule(1.6,4);
+		Body cap4 = new Body( "cap3", capgeo4 );
+		cap4.setPosition(new Vector3(-10,-11,-25));
+
 		// create a box
-		Box boxgeometry = new Box(3,3,3);
+		Box boxgeometry = new Box(6,3,3);
 		Body box = new Body( "box", boxgeometry );
 		box.setPosition(new Vector3(-3,-11,-25));
 		
@@ -78,12 +82,14 @@ public class CapsuleExample implements Rendering.Callback {
 		scene.addBody(cap);
 		scene.addBody(cap2);
 		scene.addBody(cap3);
+		scene.addBody(cap4);
 
 		// put gravity on stuff
 		scene.addForce( new GravityForce(box));		
 		scene.addForce( new GravityForce(cap));		
 		scene.addForce( new GravityForce(cap2));
 		scene.addForce( new GravityForce(cap3));		
+		scene.addForce( new GravityForce(cap4));		
 
 		
 		// handle drawing
@@ -92,11 +98,13 @@ public class CapsuleExample implements Rendering.Callback {
 		rendering.drawMe(capgeo);
 		rendering.drawMe(capgeo2);
 		rendering.drawMe(capgeo3);
+		rendering.drawMe(capgeo4);
 
 		rendering.start();
 	}
 
 	@Override
+	
 	public void tick() {
 		// each frame, to a time step on the Scene
 		scene.tick();

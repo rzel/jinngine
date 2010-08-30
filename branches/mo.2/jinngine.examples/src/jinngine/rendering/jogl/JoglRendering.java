@@ -210,7 +210,7 @@ public class JoglRendering extends Frame implements Rendering, GLEventListener, 
 		for ( DrawShape shape: toDraw) {
 			gl.glPushAttrib(GL.GL_LIGHTING_BIT);
 			gl.glPushMatrix();
-			gl.glMultMatrixd(Matrix4.pack(shape.getTransform()), 0);	
+			gl.glMultMatrixd(shape.getTransform().toArray(), 0);
 
 			
 			if (shape.getReferenceBody().deactivated) {
@@ -237,7 +237,7 @@ public class JoglRendering extends Frame implements Rendering, GLEventListener, 
 				gl.glBegin(GL.GL_POLYGON);
 				Vector3[] face = i.next();
 				//compute normal
-				Vector3 n =face[1].minus(face[0]).cross(face[2].minus(face[1])).normalize();
+				Vector3 n =face[1].sub(face[0]).cross(face[2].sub(face[1])).normalize();
 				
 				for ( Vector3 v: face) {
 					gl.glNormal3d(n.x, n.y, n.z);
@@ -259,7 +259,7 @@ public class JoglRendering extends Frame implements Rendering, GLEventListener, 
 				gl.glBegin(GL.GL_POLYGON);
 				Vector3[] face = i.next();
 				//compute normal
-				Vector3 n =face[1].minus(face[0]).cross(face[2].minus(face[1])).normalize();
+				Vector3 n =face[1].sub(face[0]).cross(face[2].sub(face[1])).normalize();
 				
 				for ( Vector3 v: face) {
 					gl.glNormal3d(n.x, n.y, n.z);
@@ -298,7 +298,7 @@ public class JoglRendering extends Frame implements Rendering, GLEventListener, 
 		
 		for ( DrawShape shape: toDraw) {
 			gl.glPushMatrix();
-			gl.glMultMatrixd(Matrix4.pack(shape.getTransform()), 0);	
+			gl.glMultMatrixd(shape.getTransform().toArray(), 0);
 //			gl.glMultMatrixd(Matrix4.pack(dt.shape.getTransform()),0);
 
 
@@ -376,15 +376,11 @@ public class JoglRendering extends Frame implements Rendering, GLEventListener, 
 	
 	
 	private Matrix4 getCameraMatrix() {
-		Matrix4 M = new Matrix4();
-		Matrix4.set(M, camera);
-		return M;
+		return new Matrix4(camera);
 	}
 
-	private Matrix4 getProjectionMatrix() {
-		Matrix4 M = new Matrix4();
-		Matrix4.set(M, proj);
-		return M;
+	private Matrix4 getProjectionMatrix() {		
+		return new Matrix4(proj);
 	}
 	
 	public void getPointerRay(Vector3 p, Vector3 d, double x, double y) {
@@ -393,9 +389,8 @@ public class JoglRendering extends Frame implements Rendering, GLEventListener, 
 		Vector3 far = new Vector3(2*x/(double)width-1,-2*(y-((height-drawHeight)*0.5))/(double)drawHeight+1, 0.9);
 
 		//inverse transform
-		Matrix4 T = getProjectionMatrix().multiply(getCameraMatrix());
-		Matrix4.invert(T);
-		
+		Matrix4 T = getProjectionMatrix().multiply(getCameraMatrix()).inverse();
+	
 		Vector3 p1 = new Vector3();
 		Vector3 p2 = new Vector3();
 		
@@ -403,7 +398,7 @@ public class JoglRendering extends Frame implements Rendering, GLEventListener, 
 		Matrix4.multiply(T,far,p2);
 		
 		p.assign(p1);
-		d.assign(p2.minus(p1).normalize());
+		d.assign(p2.sub(p1).normalize());
 	}
 	
 	/**

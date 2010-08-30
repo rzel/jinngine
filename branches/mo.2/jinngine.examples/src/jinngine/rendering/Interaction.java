@@ -5,6 +5,7 @@ import java.util.Iterator;
 import jinngine.collision.RayCast;
 import jinngine.geometry.Geometry;
 import jinngine.geometry.SupportMap3;
+import jinngine.math.InertiaMatrix;
 import jinngine.math.Matrix3;
 import jinngine.math.Vector3;
 import jinngine.physics.Body;
@@ -34,7 +35,7 @@ public class Interaction implements Rendering.EventCallback {
 		// update body
 	
 		// intersect the pointer ray with the interaction plane to get a target point
-		double u = planeNormal.dot(pickpoint.minus(point)) / planeNormal.dot(direction);
+		double u = planeNormal.dot(pickpoint.sub(point)) / planeNormal.dot(direction);
 
 		// move controller body to target position
 		controller.setPosition(point.add(direction.multiply(u)));
@@ -62,7 +63,8 @@ public class Interaction implements Rendering.EventCallback {
 					Vector3 pb = new Vector3(), pc = new Vector3();
 					double t = raycast.run((SupportMap3)gi, null, point, direction, pb, pc, 0, 0.05, 1e-7, true);
 
-					System.out.println("t="+t);
+//					write out t for debugging
+//					System.out.println("t="+t);
 					
 					if (t<parameter) {
 						parameter = t;
@@ -92,11 +94,11 @@ public class Interaction implements Rendering.EventCallback {
 			this.force.setCorrectionVelocityLimit(7);
 			
 			// copy angular mass properties
-			inertia = target.state.inertia.copy();
-			inverse = target.state.inverseinertia.copy();
+			inertia = new InertiaMatrix(target.state.inertia);
+			inverse = new InertiaMatrix(target.state.inverseinertia);
 
 			// mute angular movement
-			Matrix3.set( Matrix3.zero, target.state.inverseinertia );
+			target.state.inverseinertia.assignZero();
 			
 			// remove current movement
 			target.setVelocity(0,0,0);
@@ -118,8 +120,8 @@ public class Interaction implements Rendering.EventCallback {
 			scene.removeLiveConstraint(this.force);
 					
 			// restore angular inertia properties
-			Matrix3.set(inertia, target.state.inertia);
-			Matrix3.set(inverse, target.state.inverseinertia );
+			target.state.inertia.assign(inertia);
+			target.state.inverseinertia.assign(inverse);
 
 			// reset state
 			target = null;
